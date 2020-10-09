@@ -7,14 +7,18 @@ class Regressor:
     def __init__(self, degree):
         self.degree = 1
         if degree == 1:
-            self.weights = np.array([0.05, 0.05])  # starting weights for polynomial degree one
+            self.weights = np.array([0.1303863, 0.05355882])  # starting weights for polynomial degree one
+            # self.weights = np.random.rand(2,)
         elif degree == 2:
-            self.weights = np.array([1, 0, 1])  # starting weights for polynomial degree two
+            # self.weights = np.random.rand(3,)
+            self.weights = np.array([0.22115549, 0.2138444, 0.26373176])  # starting weights for polynomial degree two
         elif degree == 4:
-            self.weights = np.array([1, 0, 1, 0, 1])  # starting weights for polynomial degree 4
+            # self.weights = np.random.rand(5,)
+            self.weights = np.array([-0.54140065,  0.48168128, -0.27298078, -0.03292346, -0.09983796])  # starting weights for polynomial degree 4
         elif degree == 7:
-            self.weights = np.array([0.97317577, 0.15005726, 0.59010096, 0.22459232, 0.57386271, -0.02791413, -0.05072404, -0.00916566])
-            # starting weights for polynomial degree 7 (MSE 4.6542 on dataset1), fit is WEIRD tho
+            # self.weights = np.random.rand(8,)
+            self.weights = np.array([-1.06850255,  1.2811347,  -0.18763978,  1.35401293 , 0.10015698 , 0.69093328 ,0.00479627, -0.39636938])
+            # self.weights = np.array([-0.06337198, 0.07073019, -0.04089214, 0.06482378, -0.03962897, 0.05469127, -0.0191296, -0.05641042]) synth2
         self.alpha = 0.000001
         self.epochs = 20000
 
@@ -25,7 +29,6 @@ class Regressor:
             # append column of 1's to beginning of data to fold special bias case in
             b_error = np.sum(np.subtract(self.predict(x), y))
             bias = bias - self.alpha * (1/len(x)) * b_error
-            # w_error = np.sum(np.matmul(np.subtract(self.predict(x), y), x))
             for i in range(len(weights)):
                 weights[i] = weights[i] - self.alpha * (1 / len(x)) * np.sum(np.matmul(np.subtract(self.predict(x), y), x[:, i]))
             self.weights = np.concatenate((bias, weights))
@@ -79,16 +82,17 @@ def polynomial_features(x, degree):
 
 def test_poly_regressor():
     files = ['data/synthetic-1.csv', 'data/synthetic-2.csv', 'data/synthetic-3.csv']
-    data = np.genfromtxt(files[0], delimiter=',')
+    file_index = 1
+    data = np.genfromtxt(files[file_index], delimiter=',')
     x = data[:, 0]
     y = data[:, 1]
-    degree = 7
-    x_poly = polynomial_features(x, degree)  # calculate basis expansion
-    poly_regressor = Regressor(degree)  # initialize regressor
-    poly_regressor.fit(x_poly, y)  # train regressor
-    poly_regressor.plot(x, y, files[0])  # plot training data and fit curve
-    print(poly_regressor.MSE(x_poly, y))  # calculate mean squared error
-    print(poly_regressor.weights)
+    for degree in [1,2,4,7]:
+        x_poly = polynomial_features(x, degree)  # calculate basis expansion
+        poly_regressor = Regressor(degree)  # initialize regressor
+        poly_regressor.fit(x_poly, y)  # train regressor
+        poly_regressor.plot(x, y, files[file_index])  # plot training data and curve
+        print(poly_regressor.MSE(x_poly, y))  # calculate mean squared error
+        print(poly_regressor.weights)
 
 
 test_poly_regressor()
